@@ -6,6 +6,8 @@
 int main(void)
 {
 	unsigned int adc_value;
+	unsigned int average_value;
+	unsigned int moving_sum;
 	unsigned char leds;
 
 	// PD0-4 as output
@@ -14,20 +16,23 @@ int main(void)
 	
 	//enable ADC
 	ADCSRA = (1<<ADEN); //enable ADC
-	ADMUX |= (1<<ADLAR); //left adjusted, result in ADCH
 
 	while (1)
 	{
 		ADCSRA |= (1<<ADSC);
 		while (ADCSRA & (1<<ADSC));
-		adc_value = (ADCH + adc_value) / 2; // moving average
+		adc_value = ADCL;
+		adc_value += ADCH << 8;
+		moving_sum = moving_sum - moving_sum / 10;
+		moving_sum += adc_value;
+		average_value = moving_sum / 10;
 		leds = 0;
-		if (adc_value > 3) leds |= (1<<0);
-		if (adc_value > 6) leds |= (1<<1);
-		if (adc_value > 16) leds |= (1<<2);
-		if (adc_value > 40) leds |= (1<<3);
-		if (adc_value > 101) leds |= (1<<4);
+		if (average_value > 3) leds |= (1<<0);
+		if (average_value > 6) leds |= (1<<1);
+		if (average_value > 16) leds |= (1<<2);
+		if (average_value > 40) leds |= (1<<3);
+		if (average_value > 101) leds |= (1<<4);
 		PORTD = leds;
-		_delay_ms(50);
+		_delay_ms(10);
 	}
 }
