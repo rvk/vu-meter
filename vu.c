@@ -5,7 +5,7 @@
 
 int main(void)
 {
-	unsigned char adc_value;
+	unsigned int adc_value;
 	unsigned char leds;
 
 	// PD0-4 as output
@@ -20,7 +20,7 @@ int main(void)
 	{
 		ADCSRA |= (1<<ADSC);
 		while (ADCSRA & (1<<ADSC));
-		adc_value = ADCH;
+		adc_value = (ADCH + adc_value) / 2; // moving average
 		leds = 0;
 		if (adc_value > 3) leds |= (1<<0);
 		if (adc_value > 6) leds |= (1<<1);
@@ -28,5 +28,6 @@ int main(void)
 		if (adc_value > 40) leds |= (1<<3);
 		if (adc_value > 101) leds |= (1<<4);
 		PORTD = leds;
+		_delay_ms(50);
 	}
 }
